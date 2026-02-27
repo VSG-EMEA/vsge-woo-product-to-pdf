@@ -18,25 +18,16 @@
   },
   "devDependencies": {
     "@types/js-beautify": "^1.14.3",
-    "@types/pdfmake": "^0.1.20",
-    "@types/wordpress__block-editor": "6.0.6",
-    "@types/wordpress__blocks": "11.0.9",
-    "@types/wordpress__data": "^6.0.2",
-    "@types/wordpress__editor": "^13.6.7",
-    "@woocommerce/settings": "^1.0.0",
-    "@wordpress/block-editor": "^12.25.0",
-    "@wordpress/blocks": "^12.34.0",
-    "@wordpress/components": "^27.5.0",
-    "@wordpress/element": "^5.34.0",
-    "@wordpress/env": "^9.9.0",
-    "@wordpress/i18n": "^4.57.0",
+    "@types/pdfmake": "^0.3.1",
+    "@wordpress/blocks": "^15.13.0",
+    "@wordpress/i18n": "^6.13.0",
     "@wordpress/icons": "^9.49.0",
-    "@wordpress/scripts": "^27.8.0",
+    "@wordpress/scripts": "^31.5.0",
     "@wp-blocks/tsconfig": "^0.1.0"
   },
   "dependencies": {
-    "js-beautify": "^1.15.1",
-    "pdfmake": "^0.2.10"
+    "js-beautify": "^1.15.4",
+    "pdfmake": "^0.3.5"
   },
   "browserslist": [
     "extends @wordpress/browserslist-config"

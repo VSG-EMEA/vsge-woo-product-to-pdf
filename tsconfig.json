@@ -12,7 +12,8 @@
 		// Don't emit; allow Babel to transform files.
 		"outDir": "build",
 		"baseUrl": "src",
-		"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true
 	},
 	"include": [
 		"./src/**/*"
