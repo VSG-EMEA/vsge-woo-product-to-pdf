@@ -1,54 +1,78 @@
-import { makeProductPDF } from './makeProductPDF';
-import { fonts } from './const';
+// src/view.ts
 import apiFetch from '@wordpress/api-fetch';
+import { PDFGenerator } from './PDFGenerator';
 
-const endpoint = '/wc/v3/products';
+// 1. Setup a basic configuration object
+const apiConfig = {
+	endpoints: {
+		product: '/wc/v3/products',
+		page: '/wp/v2/pages',
+		post: '/wp/v2/posts',
+	},
+	// You can add query parameters here to optimize API speed (e.g., '?_fields=id,name...')
+	queryParams: '',
+};
+
+// 2. Fetch data dynamically based on the type
 /**
- * Get product data using the WooCommerce REST API
+ *
  * @param id
+ * @param type
  */
-async function getProductDataset( id: number ) {
+async function getPostData( id: number, type: string ) {
+	// Fallback to 'page' endpoint if the type isn't 'product'
+	const endpoint =
+		type === 'product'
+			? apiConfig.endpoints.product
+			: apiConfig.endpoints.page;
 	return await apiFetch( {
-		path: `${ endpoint }/${ id }`,
-	} ).then( ( result ) => result );
-}
-
-/**
- * Generate PDF from HTML wooCommerce product page
- * @param args
- */
-async function genPDF( args ) {
-	const product2pdf = new makeProductPDF( {
-		fonts,
-		productData: args,
-		extraData: ExtraProductData as Record< string, any >,
+		path: `${ endpoint }/${ id }${ apiConfig.queryParams }`,
 	} );
-
-	return await product2pdf.process();
 }
 
-// on click trigger the PDf from HTML fn
-const downloadButtons: NodeListOf< HTMLButtonElement > =
-	document.querySelectorAll( '.wp-block-vsge-save-pdf-button' ) || [];
+// 3. Attach event listeners
+const downloadButtons = document.querySelectorAll< HTMLAnchorElement >(
+	'.wp-block-vsge-save-pdf-button'
+);
 
-for ( const downloadButton of downloadButtons ) {
+downloadButtons.forEach( ( downloadButton ) => {
 	downloadButton.addEventListener( 'click', async ( e ) => {
-		const productData = await getProductDataset(
-			Number( downloadButton.dataset.productId )
-		);
+		e.preventDefault();
 
-		// Checking to see if the download button has the class of loading. If it does, it will stop the propagation of the event and return a console log of "please wait!"
+		// Prevent multiple clicks
 		if ( downloadButton.classList.contains( 'loading' ) ) {
-			e.stopPropagation();
-			return console.log( 'please wait!' );
+			console.log( 'Please wait, generating PDF...' );
+			return;
 		}
 
-		// Add the loading class to the download button
+		const postId = Number( downloadButton.dataset.postId );
+		const postType = downloadButton.dataset.postType || 'page';
+
+		if ( ! postId ) {
+			return;
+		}
+
 		downloadButton.classList.add( 'loading' );
 
-		genPDF( productData ).then( () => {
+		try {
+			// Fetch the data
+			const data: any = await getPostData( postId, postType );
+
+			// Define global brand settings (these could later be pulled from the WP database)
+			const globalSettings = {
+				siteUrl: window.location.origin,
+				primaryColor: '#0064bd', // Your main brand color
+				logoBase64: null, // Optional: base64 string of your logo
+			};
+
+			// Instantiate the new generator and trigger download
+			const pdfGen = new PDFGenerator( data, postType, globalSettings );
+			await pdfGen.processAndDownload();
+		} catch ( error ) {
+			console.error( 'Error generating PDF:', error );
+		} finally {
 			downloadButton.classList.remove( 'loading' );
-			console.log( 'PDF generated!' );
-		} );
+			console.log( 'PDF generated successfully!' );
+		}
 	} );
-}
+} );
