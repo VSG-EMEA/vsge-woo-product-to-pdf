@@ -4,7 +4,6 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -18,6 +17,6 @@ import metadata from './block.json';
  */
 registerBlockType( metadata.name, {
 	edit: () => {
-		return <Button>PDF</Button>;
+		return <p>PDF Download</p>;
 	},
 } );
