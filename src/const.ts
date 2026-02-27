@@ -19,15 +19,15 @@ function getFontSet(
 	return fontSet;
 }
 
-const font = 'Klavika';
+const font = 'Poppins';
 const fontData = [
-	{ name: 'light', filename: '/assets/fonts/klavika-light-webfont.ttf' },
+	{ name: 'light', filename: '/assets/Poppins/Poppins-Light.ttf' },
 	{
 		name: 'italics',
-		filename: '/assets/fonts/klavika-light-italic-webfont.ttf',
+		filename: '/assets/Poppins/Poppins-Italic.ttf',
 	},
-	{ name: 'bold', filename: '/assets/fonts/klavika-medium-webfont.ttf' },
-	{ name: 'bolditalics', filename: '/assets/fonts/klavika-bold-webfont.ttf' },
+	{ name: 'bold', filename: '/assets/Poppins/Poppins-Bold.ttf' },
+	{ name: 'bolditalics', filename: '/assets/Poppins/Poppins-BoldItalic.ttf' },
 ];
 
 export const fonts: { [ key: string ]: Record< string, string > } = {
