@@ -101,7 +101,7 @@ function register_rest_field_custom_metadata() {
 								$urls[] = array(
 									'id'          => $attachment_id,
 									'url'         => $url,
-									'title'       => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : 'Document ' . $attachment_id,
+									'title'       => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : sprintf( __( 'Document %d', 'vsge-woo-product-to-pdf' ), $attachment_id ),
 									'mpn'         => $mpn ?? '',
 									'thumbnail'   => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
 									'description' => $attachment ? html_entity_decode( $attachment->post_excerpt, ENT_QUOTES, 'UTF-8' ) : '',
