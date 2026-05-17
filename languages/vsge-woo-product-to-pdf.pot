@@ -1,0 +1,210 @@
+# Copyright (C) 2026 vsge-woo-product-to-pdf
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: vsge-woo-product-to-pdf 0.2.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugins/vsge-woo-product-to-pdf\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"POT-Creation-Date: 2026-05-17T16:10:48.185Z\n"
+"PO-Revision-Date: 2026-MO-DA HO:MI+ZONE\n"
+"Last-Translator: codekraft <erik@codekraft.it>\n"
+"Language-Team: codekraft <erik@codekraft.it>\n"
+"X-Generator: @wp-blocks/make-pot 1.6.6\n"
+"Language: en\n"
+"X-Domain: vsge-woo-product-to-pdf\n"
+
+#: vsge-woo-product-to-pdf.php
+#. Name of the plugin
+msgid "vsge-woo-product-to-pdf"
+msgstr ""
+
+#: vsge-woo-product-to-pdf.php
+#. Description of the plugin
+msgid "VSGE - PDF Generator"
+msgstr ""
+
+#: vsge-woo-product-to-pdf.php
+#. Author of the plugin
+msgid "codekraft"
+msgstr ""
+
+#: src/PDFGenerator.ts:668
+#: inc/admin-settings.php:220
+msgid "DESCRIPTION"
+msgstr ""
+
+#: src/PDFGenerator.ts:741
+#: inc/admin-settings.php:222
+msgid "ACCESSORIES"
+msgstr ""
+
+#: src/PDFGenerator.ts:745
+#: inc/admin-settings.php:223
+msgid "COMPONENTS"
+msgstr ""
+
+#: src/PDFGenerator.ts:749
+#: inc/admin-settings.php:224
+msgid "DELIVERY"
+msgstr ""
+
+#: src/PDFGenerator.ts:753
+#: inc/admin-settings.php:225
+msgid "PACKAGE"
+msgstr ""
+
+#: src/PDFGenerator.ts:757
+#: inc/admin-settings.php:226
+msgid "RELATED PRODUCTS"
+msgstr ""
+
+#: src/PDFGenerator.ts:761
+#: inc/admin-settings.php:227
+msgid "SIMILAR PRODUCTS"
+msgstr ""
+
+#: src/PDFGenerator.ts:765
+#: inc/admin-settings.php:228
+msgid "SPARE PARTS"
+msgstr ""
+
+#: src/PDFGenerator.ts:804
+#: inc/admin-settings.php:221
+msgid "TECHNICAL DETAILS"
+msgstr ""
+
+#: block.json
+#. block title
+msgid "Save PDF Button"
+msgstr ""
+
+#: inc/enable_wc_api.php:104
+msgid "Document %d"
+msgstr ""
+
+#: inc/admin-settings.php:20
+msgid "Main Settings"
+msgstr ""
+
+#: inc/admin-settings.php:21
+msgid "Color Settings"
+msgstr ""
+
+#: inc/admin-settings.php:23
+msgid "Primary Color"
+msgstr ""
+
+#: inc/admin-settings.php:24
+msgid "Black Color"
+msgstr ""
+
+#: inc/admin-settings.php:25
+msgid "White Color"
+msgstr ""
+
+#: inc/admin-settings.php:26
+msgid "Grey Color"
+msgstr ""
+
+#: inc/admin-settings.php:27
+msgid "Secondary Color"
+msgstr ""
+
+#: inc/admin-settings.php:28
+msgid "Muted Color"
+msgstr ""
+
+#: inc/admin-settings.php:29
+msgid "Font Family"
+msgstr ""
+
+#: inc/admin-settings.php:30
+msgid "Page Size"
+msgstr ""
+
+#: inc/admin-settings.php:31
+msgid "Page Margins (Left, Top, Right, Bottom)"
+msgstr ""
+
+#: inc/admin-settings.php:32
+msgid "Linked Products"
+msgstr ""
+
+#: inc/admin-settings.php:33
+msgid "Custom Logo"
+msgstr ""
+
+#: inc/admin-settings.php:34
+msgid "Footer Phrase"
+msgstr ""
+
+#: inc/admin-settings.php:40
+#: inc/admin-settings.php:41
+msgid "VSGE PDF Settings"
+msgstr ""
+
+#: inc/admin-settings.php:96
+msgid "A4"
+msgstr ""
+
+#: inc/admin-settings.php:97
+msgid "Letter"
+msgstr ""
+
+#: inc/admin-settings.php:98
+msgid "Legal"
+msgstr ""
+
+#: inc/admin-settings.php:115
+msgid "Accessories"
+msgstr ""
+
+#: inc/admin-settings.php:116
+msgid "Components"
+msgstr ""
+
+#: inc/admin-settings.php:117
+msgid "Delivery"
+msgstr ""
+
+#: inc/admin-settings.php:118
+msgid "Package"
+msgstr ""
+
+#: inc/admin-settings.php:119
+msgid "Related Products"
+msgstr ""
+
+#: inc/admin-settings.php:120
+msgid "Similar Products"
+msgstr ""
+
+#: inc/admin-settings.php:121
+msgid "Spare Parts"
+msgstr ""
+
+#: inc/admin-settings.php:133
+msgid "Upload / Select Image"
+msgstr ""
+
+#: inc/admin-settings.php:139
+msgid ""
+"Use <code>%%sep%%</code> to separate the text into primary and accent "
+"colors."
+msgstr ""
+
+#: inc/admin-settings.php:155
+msgid "Select Custom Logo"
+msgstr ""
+
+#: inc/admin-settings.php:156
+msgid "Use this image"
+msgstr ""
+
+#: inc/admin-settings.php:186
+msgid "Save Settings"
+msgstr ""
