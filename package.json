@@ -22,7 +22,8 @@
     "lint:js": "wp-scripts lint-js --fix",
     "packages-update": "wp-scripts packages-update",
     "plugin-zip": "wp-scripts plugin-zip",
-    "make-pot": "npx @wp-blocks/make-pot"
+    "makepot": "npx make-pot --silent",
+    "makejson": "npx makejson"
   },
   "devDependencies": {
     "@types/html-to-pdfmake": "^2.4.5",
@@ -33,6 +34,7 @@
     "@wordpress/icons": "^9.49.0",
     "@wordpress/scripts": "^31.5.0",
     "@wp-blocks/tsconfig": "^0.1.0",
+    "@wp-blocks/make-pot": "^1.6.6",
     "html-to-pdfmake": "^2.5.33"
   },
   "dependencies": {
