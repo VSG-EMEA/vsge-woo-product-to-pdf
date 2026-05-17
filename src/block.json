@@ -30,5 +30,6 @@
   },
   "editorScript": "file:./index.js",
   "viewScript": "file:./view.js",
+  "viewStyle": "file:./view.css",
   "render": "file:./render.php"
 }
