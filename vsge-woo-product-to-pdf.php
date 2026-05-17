@@ -14,30 +14,35 @@ if ( ! defined( 'VSGE_P2PDF_PATH' ) ) {
 }
 
 add_action( 'init', function() {
-    register_block_type( VSGE_P2PDF_PATH . '/build' );
+	register_block_type( VSGE_P2PDF_PATH . '/build' );
+	load_plugin_textdomain( 'vsge-woo-product-to-pdf', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 } );
 
 add_action( 'wp_enqueue_scripts', function() {
-    $asset_file = VSGE_P2PDF_PATH . '/build/view.asset.php';
-    $asset      = file_exists( $asset_file ) ? require $asset_file : array(
-        'dependencies' => array(),
-        'version'      => filemtime( VSGE_P2PDF_PATH . '/build/view.js' ),
-    );
+	$asset_file = VSGE_P2PDF_PATH . '/build/view.asset.php';
+	$asset      = file_exists( $asset_file ) ? require $asset_file : array(
+		'dependencies' => array(),
+		'version'      => filemtime( VSGE_P2PDF_PATH . '/build/view.js' ),
+	);
 
-    wp_enqueue_script(
-        'vsge-woo-product-to-pdf-view',
-        plugin_dir_url( __FILE__ ) . 'build/view.js',
-        $asset['dependencies'],
-        $asset['version'],
-        true // load in footer
-    );
+	wp_register_script(
+		'vsge-woo-product-to-pdf-view',
+		plugin_dir_url( __FILE__ ) . 'build/view.js',
+		$asset['dependencies'],
+		$asset['version'],
+		true // load in footer
+	);
 
-    wp_enqueue_style(
-        'vsge-woo-product-to-pdf-view',
-        plugin_dir_url( __FILE__ ) . 'build/view.css',
-        array(),
-        $asset['version']
-    );
+	wp_set_script_translations( 'vsge-woo-product-to-pdf-view', 'vsge-woo-product-to-pdf', plugin_dir_path( __FILE__ ) . 'languages' );
+
+	wp_enqueue_script( 'vsge-woo-product-to-pdf-view' );
+
+	wp_enqueue_style(
+		'vsge-woo-product-to-pdf-view',
+		plugin_dir_url( __FILE__ ) . 'build/view.css',
+		array(),
+		$asset['version']
+	);
 } );
 
 require VSGE_P2PDF_PATH . '/inc/index.php';
