@@ -1,19 +1,4 @@
 /**
- * Get current date in yyyymmdd format
- * @param date
- */
-export function yyyymmdd( date = new Date() ) {
-	const mm = date.getMonth() + 1; // getMonth() is zero-based
-	const dd = date.getDate();
-
-	return [
-		date.getFullYear(),
-		( mm > 9 ? '' : '0' ) + mm,
-		( dd > 9 ? '' : '0' ) + dd,
-	].join( '' );
-}
-
-/**
  * Get base64 from url image
  * @param url
  */
@@ -46,7 +31,8 @@ export const ifElement = ( value, selectEl = [ 'P', 'LI', 'B' ] ) =>
  * Removes null values from an object tree
  * @param tree
  */
-export const removeNulls = ( tree ) =>
+export const removeNulls = ( tree: ArrayLike< unknown > ) =>
 	Object.values( tree ).filter(
-		( value ) => Object.keys( value ).length !== 0
+		( value ) =>
+			Object.keys( value as Record< string, unknown > ).length !== 0
 	);
