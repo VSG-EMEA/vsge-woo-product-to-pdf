@@ -16,7 +16,8 @@
 		"resolveJsonModule": true
 	},
 	"include": [
-		"./src/**/*"
+		"./src/**/*",
+		"./src/block.json"
 	],
 	"exclude": [
 		"coverage",
