@@ -1,4 +1,4 @@
-// src/view.ts
+import './view.scss';
 import apiFetch from '@wordpress/api-fetch';
 import { PDFGenerator } from './PDFGenerator';
 
@@ -20,17 +20,50 @@ const apiConfig = {
  * @param type
  */
 async function getPostData( id: number, type: string ) {
+	const wpSettings = ( window as any ).VSGE_PDF_Settings || {};
+	let query = apiConfig.queryParams || '';
+	
+	if ( wpSettings.currentLanguage ) {
+		query += ( query ? '&' : '?' ) + 'lang=' + wpSettings.currentLanguage;
+	}
+
 	// Fallback to 'page' endpoint if the type isn't 'product'
 	const endpoint =
 		type === 'product'
 			? apiConfig.endpoints.product
 			: apiConfig.endpoints.page;
 	return await apiFetch( {
-		path: `${ endpoint }/${ id }${ apiConfig.queryParams }`,
+		path: `${ endpoint }/${ id }${ query }`,
 	} );
 }
 
-// 3. Attach event listeners
+
+/**
+ * Get post ID from body classes
+ *
+ * @returns {number} Post ID
+ */
+function getPostIdFromBody(): number {
+	const bodyClasses = document.body.classList;
+	for ( const className of bodyClasses ) {
+		const match = className.match( /^postid-(\d+)$/ );
+		if ( match ) {
+			return Number( match[ 1 ] );
+		}
+	}
+	return 0;
+}
+
+/**
+ * Get post type from body classes
+ *
+ * @returns {string} Post type ('product' or 'page')
+ */
+function getPostTypeFromBody(): string {
+	return document.body.classList.contains( 'single-product' ) ? 'product' : 'page';
+}
+
+// 4. Attach event listeners
 const downloadButtons = document.querySelectorAll< HTMLAnchorElement >(
 	'.wp-block-vsge-save-pdf-button'
 );
@@ -45,23 +78,34 @@ downloadButtons.forEach( ( downloadButton ) => {
 			return;
 		}
 
-		const postId = Number( downloadButton.dataset.postId );
-		const postType = downloadButton.dataset.postType || 'page';
+		// Try to get post ID from dataset first, then fallback to body classes
+		let postId = Number( downloadButton.dataset.postId );
+		if ( ! postId ) {
+			postId = getPostIdFromBody();
+		}
+
+		// Try to get post type from dataset first, then fallback to body classes
+		let postType = downloadButton.dataset.postType;
+		if ( ! postType ) {
+			postType = getPostTypeFromBody();
+		}
 
 		if ( ! postId ) {
+			console.error( 'Could not determine post ID' );
 			return;
 		}
 
-		downloadButton.classList.add( 'loading' );
+		downloadButton.classList.add('loading');
 
 		try {
 			// Fetch the data
 			const data: any = await getPostData( postId, postType );
 
-			// Define global brand settings (these could later be pulled from the WP database)
+			// Define global brand settings from WP window object if available
+			const wpSettings = ( window as any ).VSGE_PDF_Settings || {};
 			const globalSettings = {
+				...wpSettings,
 				siteUrl: window.location.origin,
-				primaryColor: '#0064bd', // Your main brand color
 				logoBase64: null, // Optional: base64 string of your logo
 			};
 

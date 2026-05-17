@@ -1,0 +1,32 @@
+/* Loading state for the PDF download button */
+.wp-block-vsge-save-pdf-button {
+	&.loading {
+		pointer-events: none;
+
+		.wp-block-button__link {
+			position: relative;
+			pointer-events: none;
+			color: transparent;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 16px;
+				height: 16px;
+				margin: -8px 0 0 -8px;
+				border: 2px solid white;
+				border-radius: 50%;
+				border-top-color: transparent;
+				animation: spin 0.8s linear infinite;
+			}
+		}
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
