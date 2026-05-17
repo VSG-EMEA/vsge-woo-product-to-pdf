@@ -1,5 +1,4 @@
 <?php
-// src/render.php
 global $post;
 $post_type = get_post_type($post);
 ?>
