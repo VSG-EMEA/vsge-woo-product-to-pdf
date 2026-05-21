@@ -45,138 +45,183 @@ function register_rest_field_application() {
 
 add_action( 'rest_api_init', 'register_rest_field_application' );
 
+/**
+ * Registers custom metadata fields for the product REST API.
+ * Optimized to return lightweight image sizes for attachments to reduce PDF file size.
+ */
 function register_rest_field_custom_metadata() {
-    $keys = array(
-        'brb_media_brochure',
-        'brb_media_drawing',
-        'brb_media_manuals',
-        'brb_media_safety_datasheets',
-        'brb_media_spare_parts',
-        '_cdmm_p_id',
-        '_company',
-        '_gtin'
-    );
-    foreach ( $keys as $key ) {
-        register_rest_field( 'product', $key, array(
-            'get_callback' => function ( $post ) use ( $key ) {
-                $val = get_post_meta( $post['id'], $key, true );
-                if ( strpos( $key, 'brb_media_' ) === 0 && ! empty( $val ) ) {
-                    $ids = array();
-                    if ( is_string( $val ) && strpos( $val, ',' ) !== false ) {
-                        $ids = array_map( 'trim', explode( ',', $val ) );
-                    } elseif ( is_numeric( $val ) || is_string( $val ) ) {
-                        $ids = array( $val );
-                    }
+	$keys = array(
+		'brb_media_brochure',
+		'brb_media_drawing',
+		'brb_media_manuals',
+		'brb_media_safety_datasheets',
+		'brb_media_spare_parts',
+		'_cdmm_p_id',
+		'_company',
+		'_gtin',
+	);
+	foreach ( $keys as $key ) {
+		register_rest_field( 'product', $key, array(
+			'get_callback' => function ( $post ) use ( $key ) {
+				$val = get_post_meta( $post['id'], $key, true );
+				if ( strpos( $key, 'brb_media_' ) === 0 && ! empty( $val ) ) {
+					$ids = array();
+					if ( is_string( $val ) && strpos( $val, ',' ) !== false ) {
+						$ids = array_map( 'trim', explode( ',', $val ) );
+					} elseif ( is_numeric( $val ) || is_string( $val ) ) {
+						$ids = array( $val );
+					}
 
-                    $urls = array();
-                    $lang_slug = isset( $_GET['lang'] ) ? sanitize_text_field( $_GET['lang'] ) : '';
+					$urls      = array();
+					$lang_slug = isset( $_GET['lang'] ) ? sanitize_text_field( $_GET['lang'] ) : '';
 
-                    foreach ( $ids as $id ) {
-                        if ( is_numeric( $id ) && $id > 0 ) {
-                            $attachment_id = (int) $id;
-                            
-                            if ( $lang_slug && function_exists( 'pll_get_post' ) ) {
-                                $translated_id = pll_get_post( $attachment_id, $lang_slug );
-                                if ( $translated_id ) {
-                                    $attachment_id = $translated_id;
-                                }
-                            }
+					foreach ( $ids as $id ) {
+						if ( is_numeric( $id ) && $id > 0 ) {
+							$attachment_id = (int) $id;
 
-                            $url = wp_get_attachment_url( $attachment_id );
-                            if ( $url ) {
-                                $attachment = get_post( $attachment_id );
-                                $mpn = get_post_meta( $attachment_id, '_sku', true );
-                                $urls[] = array(
-                                    'id' => $attachment_id,
-                                    'url' => $url,
-                                    'title' => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : 'Document ' . $attachment_id,
-                                    'mpn' => $mpn ?? '',
-                                    'thumbnail' => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
-                                    'description' => $attachment ? html_entity_decode( $attachment->post_excerpt, ENT_QUOTES, 'UTF-8' ) : ''
-                                );
-                            }
-                        }
-                    }
+							if ( $lang_slug && function_exists( 'pll_get_post' ) ) {
+								$translated_id = pll_get_post( $attachment_id, $lang_slug );
+								if ( $translated_id ) {
+									$attachment_id = $translated_id;
+								}
+							}
 
-                    if ( ! empty( $urls ) ) {
-                        return $urls;
-                    }
-                }
-                return $val;
-            }
-        ) );
-    }
+							$full_url = wp_get_attachment_url( $attachment_id );
+							if ( $full_url ) {
+								$attachment = get_post( $attachment_id );
+								$mpn        = get_post_meta( $attachment_id, '_sku', true );
+
+								/**
+								 * Optimization: Use 'medium' size for the primary URL if it's an image.
+								 * This ensures that sections like "Technical Drawings" do not embed full-size raw images.
+								 */
+								$optimized_url = wp_get_attachment_image_url( $attachment_id, 'large' );
+								$url           = $optimized_url ? $optimized_url : $full_url;
+
+								/**
+								 * PDF Specific Optimization: Fetch 'large' size for high-quality but compressed embedding.
+								 * Fallback chain: large -> medium -> full.
+								 */
+								$pdf_optimized_url = wp_get_attachment_image_url( $attachment_id, 'large' );
+								if ( ! $pdf_optimized_url ) {
+									$pdf_optimized_url = $optimized_url ? $optimized_url : $full_url;
+								}
+
+								$urls[] = array(
+									'id'                => $attachment_id,
+									'url'               => $url,
+									'pdf_optimized_url' => $pdf_optimized_url,
+									'title'             => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : sprintf( __( 'Document %d', 'vsge-woo-product-to-pdf' ), $attachment_id ),
+									'mpn'               => $mpn ?? '',
+									'thumbnail'         => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
+									'description'       => $attachment ? html_entity_decode( $attachment->post_excerpt, ENT_QUOTES, 'UTF-8' ) : '',
+								);
+							}
+						}
+					}
+
+					if ( ! empty( $urls ) ) {
+						return $urls;
+					}
+				}
+				return $val;
+			},
+		) );
+	}
 }
 
 add_action( 'rest_api_init', 'register_rest_field_custom_metadata' );
 
 
+/**
+ * Registers linked product fields (accessories, related, etc.) for the product REST API.
+ * Ensures optimized thumbnail sizes are returned for the frontend payload to keep PDFs lightweight.
+ */
 function register_rest_field_linked_product() {
-    $types = get_option( 'vsge_pdf_linked_products', array( "accessories", "related", "similar", "components", "delivery", "package", "brb_media_spare_parts" ) );
-    if ( ! is_array( $types ) || empty( $types ) ) {
-        $types = array( "accessories", "related", "similar", "components", "delivery", "package" );
-    }
-    foreach ( $types as $type ) {
-        register_rest_field( 'product', $type, array(
-                "get_callback" => function ( $post ) use ( $type ) {
-                    $val = get_post_meta( $post['id'], '_' . $type . '_ids', true );
-                    if ( is_string( $val ) && strpos( $val, ',' ) !== false ) {
-                        $val = array_map( 'trim', explode( ',', $val ) );
-                    } elseif ( is_string( $val ) && ! empty( $val ) ) {
-                        $val = array( $val );
-                    } elseif ( is_array( $val ) ) {
-                        // Already an array from postmeta (e.g. from brb importer or serialized)
-                        $val = array_values( $val );
-                    } else {
-                        $val = array();
-                    }
+	$types = get_option( 'vsge_pdf_linked_products', array( 'accessories', 'related', 'similar', 'components', 'delivery', 'package', 'brb_media_spare_parts' ) );
+	if ( ! is_array( $types ) || empty( $types ) ) {
+		$types = array( 'accessories', 'related', 'similar', 'components', 'delivery', 'package' );
+	}
+	foreach ( $types as $type ) {
+		register_rest_field( 'product', $type, array(
+			'get_callback' => function ( $post ) use ( $type ) {
+				$val = get_post_meta( $post['id'], '_' . $type . '_ids', true );
+				if ( is_string( $val ) && strpos( $val, ',' ) !== false ) {
+					$val = array_map( 'trim', explode( ',', $val ) );
+				} elseif ( is_string( $val ) && ! empty( $val ) ) {
+					$val = array( $val );
+				} elseif ( is_array( $val ) ) {
+					// Already an array from postmeta (e.g. from brb importer or serialized)
+					$val = array_values( $val );
+				} else {
+					$val = array();
+				}
 
-                    if ( empty( $val ) ) {
-                        return array();
-                    }
+				if ( empty( $val ) ) {
+					return array();
+				}
 
-                    $products = array();
-                    $lang_slug = isset( $_GET['lang'] ) ? sanitize_text_field( $_GET['lang'] ) : '';
+				$products  = array();
+				$lang_slug = isset( $_GET['lang'] ) ? sanitize_text_field( $_GET['lang'] ) : '';
 
-                    foreach ( $val as $product_id ) {
-                        if ( ! is_numeric( $product_id ) || empty( $product_id ) ) continue;
+				foreach ( $val as $product_id ) {
+					if ( ! is_numeric( $product_id ) || empty( $product_id ) ) {
+						continue;
+					}
 
-                        $woo_id = (int) $product_id;
-                        
-                        if ( $lang_slug && function_exists( 'pll_get_post' ) ) {
-                            $translated_id = pll_get_post( $woo_id, $lang_slug );
-                            if ( $translated_id ) {
-                                $woo_id = $translated_id;
-                            }
-                        }
+					$woo_id = (int) $product_id;
 
-                        $post_obj = get_post( $woo_id );
+					if ( $lang_slug && function_exists( 'pll_get_post' ) ) {
+						$translated_id = pll_get_post( $woo_id, $lang_slug );
+						if ( $translated_id ) {
+							$woo_id = $translated_id;
+						}
+					}
 
-                        if ( $post_obj && $post_obj->post_type === 'product' ) {
-                            $products[] = array(
-                                'id' => $woo_id,
-                                'mpn' => get_post_meta( $woo_id, '_sku', true ),
-                                'name' => html_entity_decode( get_the_title( $woo_id ), ENT_QUOTES, 'UTF-8' ),
-                                'description' => html_entity_decode( get_post_field( 'post_excerpt', $woo_id ), ENT_QUOTES, 'UTF-8' ),
-                                'thumbnail' => get_the_post_thumbnail_url( $woo_id, 'thumbnail' ) ?: '',
-                                'url' => get_permalink( $woo_id )
-                            );
-                        } else {
-                            // Fallback if not found
-                            $products[] = array(
-                                'id' => 0,
-                                'mpn' => $product_id,
-                                'name' => 'Product ' . $product_id,
-                                'description' => '',
-                                'thumbnail' => '',
-                                'url' => ''
-                            );
-                        }
-                    }
-                    return $products;
-                }
-            ) );
-    }
+					$post_obj = get_post( $woo_id );
+
+					if ( $post_obj && 'product' === $post_obj->post_type ) {
+						$thumbnail_url = get_the_post_thumbnail_url( $woo_id, 'thumbnail' );
+
+						// If 'thumbnail' is empty, try 'medium', then 'large', then fallback to a placeholder.
+						if ( ! $thumbnail_url ) {
+							$product       = wc_get_product( $woo_id );
+							$thumbnail_id  = $product ? $product->get_image_id() : 0;
+							$thumbnail_url = wp_get_attachment_image_url( $thumbnail_id, 'medium' );
+
+							if ( ! $thumbnail_url ) {
+								$thumbnail_url = wp_get_attachment_image_url( $thumbnail_id, 'large' );
+							}
+
+							if ( ! $thumbnail_url ) {
+								$thumbnail_url = wc_placeholder_img_src( 'thumbnail' );
+							}
+						}
+
+						$products[] = array(
+							'id'          => $woo_id,
+							'mpn'         => get_post_meta( $woo_id, '_sku', true ),
+							'name'        => html_entity_decode( get_the_title( $woo_id ), ENT_QUOTES, 'UTF-8' ),
+							'description' => html_entity_decode( get_post_field( 'post_excerpt', $woo_id ), ENT_QUOTES, 'UTF-8' ),
+							'thumbnail'   => $thumbnail_url,
+							'url'         => get_permalink( $woo_id ),
+						);
+					} else {
+						// Fallback if not found
+						$products[] = array(
+							'id'          => 0,
+							'mpn'         => $product_id,
+							'name'        => 'Product ' . $product_id,
+							'description' => '',
+							'thumbnail'   => '',
+							'url'         => '',
+						);
+					}
+				}
+				return $products;
+			},
+		) );
+	}
 }
 add_action( 'rest_api_init', 'register_rest_field_linked_product' );
 
@@ -294,4 +339,4 @@ function vsge_pdf_translate_rest_attributes( $response, $product, $request ) {
     $response->set_data( $data );
 
     return $response;
-}
+}

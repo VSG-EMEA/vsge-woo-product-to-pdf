@@ -22,7 +22,7 @@ const apiConfig = {
 async function getPostData( id: number, type: string ) {
 	const wpSettings = ( window as any ).VSGE_PDF_Settings || {};
 	let query = apiConfig.queryParams || '';
-	
+
 	if ( wpSettings.currentLanguage ) {
 		query += ( query ? '&' : '?' ) + 'lang=' + wpSettings.currentLanguage;
 	}
@@ -37,11 +37,10 @@ async function getPostData( id: number, type: string ) {
 	} );
 }
 
-
 /**
  * Get post ID from body classes
  *
- * @returns {number} Post ID
+ * @return {number} Post ID
  */
 function getPostIdFromBody(): number {
 	const bodyClasses = document.body.classList;
@@ -57,10 +56,12 @@ function getPostIdFromBody(): number {
 /**
  * Get post type from body classes
  *
- * @returns {string} Post type ('product' or 'page')
+ * @return {string} Post type ('product' or 'page')
  */
 function getPostTypeFromBody(): string {
-	return document.body.classList.contains( 'single-product' ) ? 'product' : 'page';
+	return document.body.classList.contains( 'single-product' )
+		? 'product'
+		: 'page';
 }
 
 // 4. Attach event listeners
@@ -95,7 +96,7 @@ downloadButtons.forEach( ( downloadButton ) => {
 			return;
 		}
 
-		downloadButton.classList.add('loading');
+		downloadButton.classList.add( 'loading' );
 
 		try {
 			// Fetch the data

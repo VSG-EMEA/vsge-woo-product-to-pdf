@@ -1,6 +1,7 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import htmlToPdfmake from 'html-to-pdfmake';
+import { __ } from '@wordpress/i18n';
 import {
 	TDocumentDefinitions,
 	Content,
@@ -18,37 +19,37 @@ export class PDFGenerator {
 
 	/** @return {string} The primary red color from settings or a default fallback. */
 	private get C_RED(): string {
-		return this.settings.primaryColor || '#C8102E';
+		return this.settings.primaryColor || '#c8102e';
 	}
 
 	/** @return {string} The primary black color from settings or a default fallback. */
 	private get C_BLACK(): string {
-		return this.settings.blackColor || '#000000';
+		return this.settings.blackColor || '#000';
 	}
 
 	/** @return {string} The primary white color from settings or a default fallback. */
 	private get C_WHITE(): string {
-		return this.settings.whiteColor || '#FFFFFF';
+		return this.settings.whiteColor || '#fff';
 	}
 
 	/** @return {string} A very light grey used primarily for the hero background. */
 	private get C_GREY_LIGHT(): string {
-		return '#F4F4F4';
+		return '#f4f4f4';
 	}
 
 	/** @return {string} A standard grey used for section headers. */
 	private get C_GREY_SECTION(): string {
-		return '#F3F3F3';
+		return '#f3f3f3';
 	}
 
 	/** @return {string} The secondary accent color from settings or a default fallback. */
 	private get C_SECONDARY(): string {
-		return this.settings.secondaryColor || '#FFD700';
+		return this.settings.secondaryColor || '#ffd700';
 	}
 
 	/** @return {string} The muted text color from settings or a default fallback. */
 	private get C_MUTED(): string {
-		return this.settings.mutedColor || '#555555';
+		return this.settings.mutedColor || '#555';
 	}
 
 	/** Resolved product/page title, stored so the document header can access it globally. */
@@ -205,10 +206,12 @@ export class PDFGenerator {
 							);
 						}
 					} catch ( e ) {
+						/* eslint-disable no-console */
 						console.error(
 							`[PDF] Font fetch error: ${ fullKey }`,
 							e
 						);
+						/* eslint-enable no-console */
 					}
 				}
 			}
@@ -553,7 +556,7 @@ export class PDFGenerator {
 							y: 0,
 							w: 210,
 							h: 180,
-							color: '#ffffff',
+							color: '#fff',
 						},
 					],
 			  };
@@ -602,7 +605,9 @@ export class PDFGenerator {
 									stack: [
 										{
 											text: `${
-												this.decodeHtmlEntities( this.data.name ) || 'N/A'
+												this.decodeHtmlEntities(
+													this.data.name
+												) || 'N/A'
 											}`,
 											style: 'h1',
 											margin: [ 0, 0, 0, 0 ],
@@ -660,7 +665,7 @@ export class PDFGenerator {
 		} );
 
 		content.push( {
-			text: this.getLabel( 'description', 'DESCRIPTION' ),
+			text: __( 'DESCRIPTION', 'vsge-woo-product-to-pdf' ),
 			bold: true,
 			fontSize: 12,
 			color: this.C_BLACK,
@@ -686,16 +691,21 @@ export class PDFGenerator {
 		} as any );
 
 		/* ── 3. Technical Drawings ─────────────────────────────────────────── */
-		// drawingRaw is an array of { id, url, title, thumbnail, description }.
-		// `url` may point to a PDF or an image file — we filter by extension,
-		// keeping only entries whose url ends in a known image extension.
-		// imageToBase64 uses the same Accept: image/png,image/jpeg header as
-		// the rest of the plugin and returns a data URI pdfmake can embed.
+		/**
+		 * Render technical drawings section.
+		 * drawingRaw is an array of { id, url, title, thumbnail, description }.
+		 * We use the 'url' property which has been optimized to 'medium' size (approx 300px)
+		 * in the REST API to balance quality and PDF file size.
+		 */
 		const drawingRaw = this.getMetaValue( 'brb_media_drawing' );
 
 		if ( Array.isArray( drawingRaw ) && drawingRaw.length > 0 ) {
 			const imageEntries: any[] = drawingRaw.filter( ( entry: any ) => {
-				const url: string = ( entry?.url || '' ).toLowerCase();
+				const url: string = (
+					entry?.pdf_optimized_url ||
+					entry?.url ||
+					''
+				).toLowerCase();
 				return /\.(jpe?g|png|gif|webp|svg)$/.test( url );
 			} );
 
@@ -703,14 +713,17 @@ export class PDFGenerator {
 				const drawingDataUris: string[] = [];
 
 				for ( const entry of imageEntries ) {
-					const dataUri = await this.imageToBase64( entry.url );
+					// Prioritize pdf_optimized_url if available, then fallback to entry.url.
+					const targetUrl = entry.pdf_optimized_url || entry.url;
+					const dataUri = await this.imageToBase64( targetUrl );
 					if ( dataUri ) {
 						drawingDataUris.push( dataUri );
 					} else {
 						/* eslint-disable no-console */
 						console.warn(
-							`[PDF] Technical Drawing — imageToBase64 failed for: ${ entry.url }`
+							`[PDF] Technical Drawing — imageToBase64 failed for: ${ targetUrl }`
 						);
+						/* eslint-enable no-console */
 					}
 				}
 
@@ -718,7 +731,7 @@ export class PDFGenerator {
 					for ( const dataUri of drawingDataUris ) {
 						content.push( {
 							image: dataUri,
-							width: 250,
+							width: 400,
 							alignment: 'left',
 							margin: [ 0, 0, 0, 16 ],
 						} );
@@ -729,13 +742,34 @@ export class PDFGenerator {
 
 		/* ── 4. Linked products / spare parts (2-column grid) ────────────── */
 		const allLinkedProducts = [
-			{ key: 'accessories', label: this.getLabel( 'accessories', 'ACCESSORIES' ) },
-			{ key: 'components', label: this.getLabel( 'components', 'COMPONENTS' ) },
-			{ key: 'delivery', label: this.getLabel( 'delivery', 'DELIVERY' ) },
-			{ key: 'package', label: this.getLabel( 'package', 'PACKAGE' ) },
-			{ key: 'related', label: this.getLabel( 'related', 'RELATED PRODUCTS' ) },
-			{ key: 'similar', label: this.getLabel( 'similar', 'SIMILAR PRODUCTS' ) },
-			{ key: 'brb_media_spare_parts', label: this.getLabel( 'spare_parts', 'SPARE PARTS' ) },
+			{
+				key: 'accessories',
+				label: __( 'ACCESSORIES', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'components',
+				label: __( 'COMPONENTS', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'delivery',
+				label: __( 'DELIVERY', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'package',
+				label: __( 'PACKAGE', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'related',
+				label: __( 'RELATED PRODUCTS', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'similar',
+				label: __( 'SIMILAR PRODUCTS', 'vsge-woo-product-to-pdf' ),
+			},
+			{
+				key: 'brb_media_spare_parts',
+				label: __( 'SPARE PARTS', 'vsge-woo-product-to-pdf' ),
+			},
 		];
 
 		const enabledTypes = this.settings.linkedProducts;
@@ -771,7 +805,12 @@ export class PDFGenerator {
 			Array.isArray( attributes ) &&
 			attributes.length > 0
 		) {
-			content.push( this.sectionTitle( this.getLabel( 'technical_details', 'TECHNICAL DETAILS' ), 'before' ) );
+			content.push(
+				this.sectionTitle(
+					__( 'TECHNICAL DETAILS', 'vsge-woo-product-to-pdf' ),
+					'before'
+				)
+			);
 			content.push( this.buildAttributesTable( attributes ) );
 		}
 
@@ -791,9 +830,13 @@ export class PDFGenerator {
 	private buildAttributesTable( attributes: any[] ): Content {
 		const dataRows: any[][] = attributes.map( ( attr, idx ) => {
 			const values = Array.isArray( attr.options )
-				? attr.options.map( ( opt: string ) => this.decodeHtmlEntities( opt ) ).join( ', ' )
+				? attr.options
+						.map( ( opt: string ) =>
+							this.decodeHtmlEntities( opt )
+						)
+						.join( ', ' )
 				: this.decodeHtmlEntities( String( attr.options ?? '' ) );
-			const fillColor = idx % 2 === 0 ? '#FFFFFF' : '#F3F3F3';
+			const fillColor = idx % 2 === 0 ? '#fff' : '#F3F3F3';
 			return [
 				{
 					text: this.decodeHtmlEntities( attr.name ),
@@ -915,19 +958,25 @@ export class PDFGenerator {
 
 	/**
 	 * Constructs the internal layout and content for a singular item block within a grid cell.
+	 * Optimized to use 'thumbnail' image size (150x150) for the 50x50 grid display,
+	 * ensuring high quality on high-DPI displays while keeping the PDF file size small.
 	 *
 	 * @param {any} item - The individual item data object (containing name, thumbnail, mpn, etc.).
 	 * @return {Promise<Content>} A promise resolving to the pdfMake content object representing the grid item.
 	 */
 	private async buildGridItem( item: any ): Promise< Content > {
-		const title = this.decodeHtmlEntities( item.name || item.title || String( item.id ?? item ) );
+		const title = this.decodeHtmlEntities(
+			item.name || item.title || String( item.id ?? item )
+		);
 		const mpn = this.decodeHtmlEntities( item.mpn || '' );
 		const desc = this.decodeHtmlEntities( item.description || '' );
 
 		let imageBase64: string | null = null;
 		if ( item.thumbnail ) {
+			// item.thumbnail is already optimized to 'thumbnail' size (usually 150x150) in PHP
 			imageBase64 = await this.imageToBase64( item.thumbnail );
 		} else if ( item.url && /\.(png|jpe?g)$/i.test( item.url ) ) {
+			// Fallback to url if thumbnail is missing
 			imageBase64 = await this.imageToBase64( item.url );
 		}
 
@@ -1183,26 +1232,19 @@ export class PDFGenerator {
 
 	/**
 	 * Decode HTML entities like &#039; to actual characters.
-	 * 
+	 *
 	 * @param {string} str - The string containing HTML entities.
 	 * @return {string} The decoded string.
 	 */
 	private decodeHtmlEntities( str: string ): string {
-		if ( ! str ) return str;
-		if ( typeof window === 'undefined' ) return str; // Safety check
+		if ( ! str ) {
+			return str;
+		}
+		if ( typeof window === 'undefined' ) {
+			return str; // Safety check
+		}
 		const txt = document.createElement( 'textarea' );
 		txt.innerHTML = str;
 		return txt.value;
-	}
-
-	/**
-	 * Get a translated label from settings, or return a fallback.
-	 * 
-	 * @param {string} key - The label key.
-	 * @param {string} fallback - The fallback label.
-	 * @return {string} The resolved label.
-	 */
-	private getLabel( key: string, fallback: string ): string {
-		return this.settings.labels?.[ key ] || fallback;
 	}
 }

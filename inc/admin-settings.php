@@ -17,26 +17,32 @@ function vsge_pdf_register_settings() {
     register_setting( 'vsge_pdf_options_group', 'vsge_pdf_custom_logo' );
     register_setting( 'vsge_pdf_options_group', 'vsge_pdf_footer_phrase' );
 
-    add_settings_section( 'vsge_pdf_main_section', 'Main Settings', null, 'vsge_pdf_settings' );
-    add_settings_section( 'vsge_pdf_colors_section', 'Color Settings', null, 'vsge_pdf_settings' );
+    add_settings_section( 'vsge_pdf_main_section', __( 'Main Settings', 'vsge-woo-product-to-pdf' ), null, 'vsge_pdf_settings' );
+    add_settings_section( 'vsge_pdf_colors_section', __( 'Color Settings', 'vsge-woo-product-to-pdf' ), null, 'vsge_pdf_settings' );
 
-    add_settings_field( 'vsge_pdf_primary_color', 'Primary Color', 'vsge_pdf_primary_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_black_color', 'Black Color', 'vsge_pdf_black_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_white_color', 'White Color', 'vsge_pdf_white_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_grey_color', 'Grey Color', 'vsge_pdf_grey_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_secondary_color', 'Secondary Color', 'vsge_pdf_secondary_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_muted_color', 'Muted Color', 'vsge_pdf_muted_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
-    add_settings_field( 'vsge_pdf_font_family', 'Font Family', 'vsge_pdf_font_family_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
-    add_settings_field( 'vsge_pdf_page_size', 'Page Size', 'vsge_pdf_page_size_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
-    add_settings_field( 'vsge_pdf_page_margins', 'Page Margins (Left, Top, Right, Bottom)', 'vsge_pdf_page_margins_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
-    add_settings_field( 'vsge_pdf_linked_products', 'Linked Products', 'vsge_pdf_linked_products_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
-    add_settings_field( 'vsge_pdf_custom_logo', 'Custom Logo', 'vsge_pdf_custom_logo_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
-    add_settings_field( 'vsge_pdf_footer_phrase', 'Footer Phrase', 'vsge_pdf_footer_phrase_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_primary_color', __( 'Primary Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_primary_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_black_color', __( 'Black Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_black_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_white_color', __( 'White Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_white_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_grey_color', __( 'Grey Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_grey_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_secondary_color', __( 'Secondary Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_secondary_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_muted_color', __( 'Muted Color', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_muted_color_cb', 'vsge_pdf_settings', 'vsge_pdf_colors_section' );
+    add_settings_field( 'vsge_pdf_font_family', __( 'Font Family', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_font_family_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_page_size', __( 'Page Size', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_page_size_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_page_margins', __( 'Page Margins (Left, Top, Right, Bottom)', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_page_margins_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_linked_products', __( 'Linked Products', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_linked_products_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_custom_logo', __( 'Custom Logo', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_custom_logo_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
+    add_settings_field( 'vsge_pdf_footer_phrase', __( 'Footer Phrase', 'vsge-woo-product-to-pdf' ), 'vsge_pdf_footer_phrase_cb', 'vsge_pdf_settings', 'vsge_pdf_main_section' );
 }
 add_action( 'admin_init', 'vsge_pdf_register_settings' );
 
 function vsge_pdf_add_options_page() {
-    add_options_page( 'VSGE PDF Settings', 'VSGE PDF Settings', 'manage_options', 'vsge_pdf_settings', 'vsge_pdf_options_page_html' );
+    add_options_page(
+        __( 'VSGE PDF Settings', 'vsge-woo-product-to-pdf' ),
+        __( 'VSGE PDF Settings', 'vsge-woo-product-to-pdf' ),
+        'manage_options',
+        'vsge_pdf_settings',
+        'vsge_pdf_options_page_html'
+    );
 }
 add_action( 'admin_menu', 'vsge_pdf_add_options_page' );
 
@@ -87,9 +93,9 @@ function vsge_pdf_page_size_cb() {
     $val = get_option( 'vsge_pdf_page_size', 'A4' );
     ?>
     <select name="vsge_pdf_page_size">
-        <option value="A4" <?php selected( $val, 'A4' ); ?>>A4</option>
-        <option value="LETTER" <?php selected( $val, 'LETTER' ); ?>>Letter</option>
-        <option value="LEGAL" <?php selected( $val, 'LEGAL' ); ?>>Legal</option>
+        <option value="A4" <?php selected( $val, 'A4' ); ?>><?php esc_html_e( 'A4', 'vsge-woo-product-to-pdf' ); ?></option>
+        <option value="LETTER" <?php selected( $val, 'LETTER' ); ?>><?php esc_html_e( 'Letter', 'vsge-woo-product-to-pdf' ); ?></option>
+        <option value="LEGAL" <?php selected( $val, 'LEGAL' ); ?>><?php esc_html_e( 'Legal', 'vsge-woo-product-to-pdf' ); ?></option>
     </select>
     <?php
 }
@@ -106,13 +112,13 @@ function vsge_pdf_linked_products_cb() {
     }
     
     $types = array(
-        'accessories' => 'Accessories',
-        'components' => 'Components',
-        'delivery' => 'Delivery',
-        'package' => 'Package',
-        'related' => 'Related Products',
-        'similar' => 'Similar Products',
-        'brb_media_spare_parts' => 'Spare Parts'
+        'accessories' => __( 'Accessories', 'vsge-woo-product-to-pdf' ),
+        'components'  => __( 'Components', 'vsge-woo-product-to-pdf' ),
+        'delivery'    => __( 'Delivery', 'vsge-woo-product-to-pdf' ),
+        'package'     => __( 'Package', 'vsge-woo-product-to-pdf' ),
+        'related'     => __( 'Related Products', 'vsge-woo-product-to-pdf' ),
+        'similar'     => __( 'Similar Products', 'vsge-woo-product-to-pdf' ),
+        'brb_media_spare_parts' => __( 'Spare Parts', 'vsge-woo-product-to-pdf' ),
     );
     
     foreach ( $types as $key => $label ) {
@@ -124,13 +130,13 @@ function vsge_pdf_linked_products_cb() {
 function vsge_pdf_custom_logo_cb() {
     $val = get_option( 'vsge_pdf_custom_logo', '' );
     echo '<input type="text" id="vsge_pdf_custom_logo" name="vsge_pdf_custom_logo" value="' . esc_attr( $val ) . '" style="width: 300px;" />';
-    echo ' <button type="button" class="button vsge_pdf_upload_logo_btn">Upload / Select Image</button>';
+    echo ' <button type="button" class="button vsge_pdf_upload_logo_btn">' . esc_html__( 'Upload / Select Image', 'vsge-woo-product-to-pdf' ) . '</button>';
 }
 
 function vsge_pdf_footer_phrase_cb() {
     $val = get_option( 'vsge_pdf_footer_phrase', 'SERVING THE SHOP ® %%sep%% SINCE 1925' );
     echo '<input type="text" name="vsge_pdf_footer_phrase" value="' . esc_attr( $val ) . '" style="width: 400px;" />';
-    echo '<p class="description">Use <code>%%sep%%</code> to separate the text into primary and accent colors.</p>';
+    echo '<p class="description">' . wp_kses_post( __( 'Use <code>%%sep%%</code> to separate the text into primary and accent colors.', 'vsge-woo-product-to-pdf' ) ) . '</p>';
 }
 
 function vsge_pdf_admin_enqueue_scripts( $hook ) {
@@ -146,8 +152,8 @@ function vsge_pdf_admin_enqueue_scripts( $hook ) {
             uploadBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 var custom_uploader = wp.media({
-                    title: 'Select Custom Logo',
-                    button: { text: 'Use this image' },
+                    title: '<?php echo esc_js( __( 'Select Custom Logo', 'vsge-woo-product-to-pdf' ) ); ?>',
+                    button: { text: '<?php echo esc_js( __( 'Use this image', 'vsge-woo-product-to-pdf' ) ); ?>' },
                     multiple: false
                 });
                 custom_uploader.on('select', function() {
@@ -172,12 +178,12 @@ function vsge_pdf_options_page_html() {
     }
     ?>
     <div class="wrap">
-        <h1>VSGE PDF Generator Settings</h1>
+        <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
         <form action="options.php" method="post">
             <?php
             settings_fields( 'vsge_pdf_options_group' );
             do_settings_sections( 'vsge_pdf_settings' );
-            submit_button( 'Save Settings' );
+            submit_button( __( 'Save Settings', 'vsge-woo-product-to-pdf' ) );
             ?>
         </form>
     </div>
