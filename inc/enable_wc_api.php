@@ -95,16 +95,26 @@ function register_rest_field_custom_metadata() {
 								 * Optimization: Use 'medium' size for the primary URL if it's an image.
 								 * This ensures that sections like "Technical Drawings" do not embed full-size raw images.
 								 */
-								$optimized_url = wp_get_attachment_image_url( $attachment_id, 'medium' );
+								$optimized_url = wp_get_attachment_image_url( $attachment_id, 'large' );
 								$url           = $optimized_url ? $optimized_url : $full_url;
 
+								/**
+								 * PDF Specific Optimization: Fetch 'large' size for high-quality but compressed embedding.
+								 * Fallback chain: large -> medium -> full.
+								 */
+								$pdf_optimized_url = wp_get_attachment_image_url( $attachment_id, 'large' );
+								if ( ! $pdf_optimized_url ) {
+									$pdf_optimized_url = $optimized_url ? $optimized_url : $full_url;
+								}
+
 								$urls[] = array(
-									'id'          => $attachment_id,
-									'url'         => $url,
-									'title'       => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : sprintf( __( 'Document %d', 'vsge-woo-product-to-pdf' ), $attachment_id ),
-									'mpn'         => $mpn ?? '',
-									'thumbnail'   => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
-									'description' => $attachment ? html_entity_decode( $attachment->post_excerpt, ENT_QUOTES, 'UTF-8' ) : '',
+									'id'                => $attachment_id,
+									'url'               => $url,
+									'pdf_optimized_url' => $pdf_optimized_url,
+									'title'             => $attachment ? html_entity_decode( $attachment->post_title, ENT_QUOTES, 'UTF-8' ) : sprintf( __( 'Document %d', 'vsge-woo-product-to-pdf' ), $attachment_id ),
+									'mpn'               => $mpn ?? '',
+									'thumbnail'         => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
+									'description'       => $attachment ? html_entity_decode( $attachment->post_excerpt, ENT_QUOTES, 'UTF-8' ) : '',
 								);
 							}
 						}
@@ -171,12 +181,29 @@ function register_rest_field_linked_product() {
 					$post_obj = get_post( $woo_id );
 
 					if ( $post_obj && 'product' === $post_obj->post_type ) {
+						$thumbnail_url = get_the_post_thumbnail_url( $woo_id, 'thumbnail' );
+
+						// If 'thumbnail' is empty, try 'medium', then 'large', then fallback to a placeholder.
+						if ( ! $thumbnail_url ) {
+							$product       = wc_get_product( $woo_id );
+							$thumbnail_id  = $product ? $product->get_image_id() : 0;
+							$thumbnail_url = wp_get_attachment_image_url( $thumbnail_id, 'medium' );
+
+							if ( ! $thumbnail_url ) {
+								$thumbnail_url = wp_get_attachment_image_url( $thumbnail_id, 'large' );
+							}
+
+							if ( ! $thumbnail_url ) {
+								$thumbnail_url = wc_placeholder_img_src( 'thumbnail' );
+							}
+						}
+
 						$products[] = array(
 							'id'          => $woo_id,
 							'mpn'         => get_post_meta( $woo_id, '_sku', true ),
 							'name'        => html_entity_decode( get_the_title( $woo_id ), ENT_QUOTES, 'UTF-8' ),
 							'description' => html_entity_decode( get_post_field( 'post_excerpt', $woo_id ), ENT_QUOTES, 'UTF-8' ),
-							'thumbnail'   => get_the_post_thumbnail_url( $woo_id, 'thumbnail' ) ?: '',
+							'thumbnail'   => $thumbnail_url,
 							'url'         => get_permalink( $woo_id ),
 						);
 					} else {
