@@ -701,7 +701,11 @@ export class PDFGenerator {
 
 		if ( Array.isArray( drawingRaw ) && drawingRaw.length > 0 ) {
 			const imageEntries: any[] = drawingRaw.filter( ( entry: any ) => {
-				const url: string = ( entry?.url || '' ).toLowerCase();
+				const url: string = (
+					entry?.pdf_optimized_url ||
+					entry?.url ||
+					''
+				).toLowerCase();
 				return /\.(jpe?g|png|gif|webp|svg)$/.test( url );
 			} );
 
@@ -709,15 +713,17 @@ export class PDFGenerator {
 				const drawingDataUris: string[] = [];
 
 				for ( const entry of imageEntries ) {
-					// Use entry.url (optimized to medium size in PHP)
-					const dataUri = await this.imageToBase64( entry.url );
+					// Prioritize pdf_optimized_url if available, then fallback to entry.url.
+					const targetUrl = entry.pdf_optimized_url || entry.url;
+					const dataUri = await this.imageToBase64( targetUrl );
 					if ( dataUri ) {
 						drawingDataUris.push( dataUri );
 					} else {
 						/* eslint-disable no-console */
 						console.warn(
-							`[PDF] Technical Drawing — imageToBase64 failed for: ${ entry.url }`
+							`[PDF] Technical Drawing — imageToBase64 failed for: ${ targetUrl }`
 						);
+						/* eslint-enable no-console */
 					}
 				}
 
@@ -725,7 +731,7 @@ export class PDFGenerator {
 					for ( const dataUri of drawingDataUris ) {
 						content.push( {
 							image: dataUri,
-							width: 250,
+							width: 400,
 							alignment: 'left',
 							margin: [ 0, 0, 0, 16 ],
 						} );
